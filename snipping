@@ -1,0 +1,8 @@
+#!/bin/bash
+
+path_for_tempScreenshot=/tmp/tem_img.png
+
+
+import ${path_for_tempScreenshot}
+
+xclip -sel c -t image/png < ${path_for_tempScreenshot}
