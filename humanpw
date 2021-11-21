@@ -1,0 +1,35 @@
+#!/bin/bash 
+# Constants 
+ALL_NON_RANDOM_WORDS=/usr/share/dict/words
+# total number of non-random words available 
+non_random_words=`cat $ALL_NON_RANDOM_WORDS | wc -l` 
+# number of random generated words depends on supplied argument 
+
+random_number=`od -N3 -An -i /dev/urandom | 
+awk -v f=0 -v r="$non_random_words" '{printf "%i\n", f + r * $1 / 16777216}'` 
+random_word="$(sed `echo $random_number`"q;d" $ALL_NON_RANDOM_WORDS)"
+
+pwlength=$1
+
+while [ ${#random_word} -le $(($pwlength-12)) ]
+do
+	foo=0
+	tmp_word="${random_word}"
+	while [ ${#tmp_word} -gt $(($pwlength-6)) ] || [ ${foo} -le 0 ]
+	do
+		foo=1
+		tmp_word="${random_word}"
+		random_number=`od -N3 -An -i /dev/urandom | 
+		awk -v f=0 -v r="$non_random_words" '{printf "%i\n", f + r * $1 / 16777216}'` 
+		tmp_word="${random_word}-$(sed `echo $random_number`"q;d" $ALL_NON_RANDOM_WORDS)"
+	done
+	random_word=${tmp_word}
+done
+
+remaining=$(($pwlength-1-${#random_word}))
+random_number=$(pwgen -Bnc $((${remaining})) 1)
+random_word="${random_word}-${random_number}"
+
+echo $random_word
+
+
